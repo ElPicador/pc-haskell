@@ -1,5 +1,5 @@
 import Test.Hspec
-import Lib (pchar, run, (.>>.), (<|>), Result(..))
+import Lib (pchar, run, (.>>.), (<|>), Result(..), parseLowercase, parseDigit)
 
 pcharA = pchar 'A'
 pcharB = pchar 'B'
@@ -34,3 +34,11 @@ main = hspec $ do
 
       it "parses 'ZBC'" $ do
         run pcharAOrB "ZBC" `shouldBe` Failure "Expecting 'B'. Got 'Z'"
+
+  describe "parseLowercase" $ do
+    it "parses 'aBC'" $ do
+        run parseLowercase "aBC" `shouldBe` Success ('a', "BC")
+
+  describe "parseDigit" $ do
+    it "parses '1ABC'"$ do
+        run parseDigit "1ABC" `shouldBe` Success ('1', "ABC")

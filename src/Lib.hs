@@ -1,5 +1,15 @@
 module Lib
-    ( Result(..), pchar, run, andThen, (.>>.), orElse, (<|>) ) where
+    ( Result(..)
+    , pchar
+    , run
+    , andThen
+    , (.>>.)
+    , orElse
+    , (<|>)
+    , anyOf
+    , parseLowercase
+    , parseDigit
+    , mapP) where
 
 data Result a =
     Success a |
@@ -32,7 +42,6 @@ andThen parser1 parser2 = Parser f
 
 (.>>.) = andThen
 
-
 orElse :: Parser t -> Parser t -> Parser t
 orElse parser1 parser2 = Parser f
     where
@@ -41,3 +50,30 @@ orElse parser1 parser2 = Parser f
             Failure _ -> run parser2 input
 
 (<|>) = orElse
+
+choice :: [Parser t] -> Parser t
+choice = foldr1 orElse
+
+anyOf :: [Char] -> Parser Char
+anyOf = choice . map pchar
+
+parseLowercase :: Parser Char
+parseLowercase = anyOf ['a'..'z']
+
+parseDigit :: Parser Char
+parseDigit = anyOf ['0'..'9']
+
+mapP :: (a -> b) -> Parser a -> Parser b
+mapP f parser = Parser innerF
+    where
+        innerF input = case run parser input of
+            Failure s -> Failure s
+            Success (value, remaining) -> Success (f value, remaining)
+
+(<!>) = mapP
+
+parseThreeDigitsAsStr :: () -> Parser String
+parseThreeDigitsAsStr = mapP transformTuple tupleParser
+    where
+        tupleParser = parseDigit .>>. parseDigit .>>. parseDigit
+        transformTuple ((c1, c2), c3) = [c1, c2, c3]

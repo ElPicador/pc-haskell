@@ -4,3 +4,4 @@ pc-haskell.cabal
 .idea/
 out/
 pc-haskell.iml
+.DS_Store
